@@ -19,10 +19,6 @@ function config ( ) {
   env.PORT = readENV('PORT', 1337);
   env.static_files = readENV('NIGHTSCOUT_STATIC_FILES', __dirname + '/static/');
 
-  if (env.err) {
-    delete env.err;
-  }
-
   setSSL();
   setAPISecret();
   setVersion();
@@ -58,14 +54,12 @@ function setAPISecret() {
   // if a passphrase was provided, get the hex digest to mint a single token
   if (useSecret) {
     if (readENV('API_SECRET').length < consts.MIN_PASSPHRASE_LENGTH) {
-      var msg = ['API_SECRET should be at least', consts.MIN_PASSPHRASE_LENGTH, 'characters'].join(' ');
-      console.error(msg);
-      env.err = {desc: msg};
-    } else {
-      var shasum = crypto.createHash('sha1');
-      shasum.update(readENV('API_SECRET'));
-      env.api_secret = shasum.digest('hex');
+      var msg = ['API_SECRET should be at least', consts.MIN_PASSPHRASE_LENGTH, 'characters'];
+      throw new Error(msg.join(' '));
     }
+    var shasum = crypto.createHash('sha1');
+    shasum.update(readENV('API_SECRET'));
+    env.api_secret = shasum.digest('hex');
   }
 }
 
@@ -106,7 +100,6 @@ function setMongo() {
   env.treatments_collection = readENV('MONGO_TREATMENTS_COLLECTION', 'treatments');
   env.profile_collection = readENV('MONGO_PROFILE_COLLECTION', 'profile');
   env.devicestatus_collection = readENV('MONGO_DEVICESTATUS_COLLECTION', 'devicestatus');
-  env.food_collection = readENV('MONGO_FOOD_COLLECTION', 'food');
 
   // TODO: clean up a bit
   // Some people prefer to use a json configuration file instead.
@@ -140,8 +133,8 @@ function readENV(varName, defaultValue) {
     || process.env[varName]
     || process.env[varName.toLowerCase()];
 
-  if (typeof value === 'string' && (value.toLowerCase() === 'on' || value.toLowerCase() === 'true')) { value = true; }
-  if (typeof value === 'string' && (value.toLowerCase() === 'off' || value.toLowerCase() === 'false')) { value = false; }
+  if (typeof value === 'string' && value.toLowerCase() === 'on') { value = true; }
+  if (typeof value === 'string' && value.toLowerCase() === 'off') { value = false; }
 
   return value != null ? value : defaultValue;
 }
@@ -164,8 +157,6 @@ function findExtendedSettings (envs) {
             extended[enable] = exts;
             var ext = _.camelCase(env.substring(split + 1).toLowerCase());
             if (!isNaN(value)) { value = Number(value); }
-            if (typeof value === 'string' && (value.toLowerCase() === 'on' || value.toLowerCase() === 'true')) { value = true; }
-            if (typeof value === 'string' && (value.toLowerCase() === 'off' || value.toLowerCase() === 'false')) { value = false; }
             exts[ext] = value;
           }
         }

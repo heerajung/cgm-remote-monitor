@@ -91,7 +91,6 @@ describe('hashauth', function ( ) {
       hashauth.authenticated = true;
       next(true); 
     };
-    hashauth.updateSocketAuth = function mockUpdateSocketAuth() {};
 
     client.init(serverSettings, plugins);
 

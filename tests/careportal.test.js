@@ -109,8 +109,6 @@ describe('client', function ( ) {
       return true;
     };
 
-    window.alert = function mockAlert() {};
-    
     client.careportal.save();
   });
 

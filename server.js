@@ -49,10 +49,6 @@ require('./lib/bootevent')(env).boot(function booted (ctx) {
     var server = create(app).listen(PORT);
     console.log(translate('Listening on port'), PORT);
 
-    if (ctx.bootErrors && ctx.bootErrors.length > 0) {
-      return;
-    }
-
     if (env.MQTT_MONITOR) {
       ctx.mqtt = require('./lib/mqtt')(env, ctx);
       var es = require('event-stream');
